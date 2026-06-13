@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+**/build/
+**/local.properties
+!**/src/**/build/
+
+# Kotlin Multiplatform
+.kotlin/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+*.hprof
+out/
+.fleet/
+
+# macOS & OS-Specific
+.DS_Store
+Thumbs.db
+
+# iOS / Xcode
+# (Adjust 'iosApp' to your specific iOS module folder if renamed)
+**/iosApp/.swiftpm/
+**/iosApp/.build/
+**/iosApp/Pods/
+**/iosApp/DerivedData/
+**/iosApp/xcuserdata/
+**/iosApp/*.xcodeproj/project.xcworkspace/
+**/iosApp/*.xcodeproj/xcuserdata/
+**/iosApp/Package.resolved
+**/iosApp/*.xcworkspace/
+
+# Secrets & Local Config
+secrets.properties
