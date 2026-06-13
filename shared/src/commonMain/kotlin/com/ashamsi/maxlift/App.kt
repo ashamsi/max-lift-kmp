@@ -16,22 +16,23 @@ fun App() {
         darkColorScheme(
             primary = Color(0xFF5383EC),
             background = Color(0xFF151718),
-            surface = Color(0xFF151718),
+            surface = Color(0xFF1E2123), // Card Background
             onBackground = Color.White,
-            onSurface = Color.White
+            onSurface = Color.White,
+            outline = Color(0xFF3F4346)  // Subtle Dark Border
         )
     } else {
         lightColorScheme(
             primary = Color(0xFF5383EC),
-            background = Color.White,
-            surface = Color.White,
+            background = Color(0xFFF2F4F7), // Off-white Background
+            surface = Color.White,          // Card Background
             onBackground = Color.Black,
-            onSurface = Color.Black
+            onSurface = Color.Black,
+            outline = Color(0xFFD0D5DD)    // Subtle Light Border
         )
     }
 
     MaterialTheme(colorScheme = colorScheme) {
-        // This will now fill the entire screen on both Android and iOS
         ParallaxScreen()
     }
 }

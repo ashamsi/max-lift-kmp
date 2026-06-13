@@ -2,6 +2,7 @@ package com.ashamsi.maxlift
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -71,7 +72,12 @@ fun ParallaxScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = if (isSystemInDarkTheme()) Color(0xFF1E2123) else Color(0xFFF5F5F5),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline,
                         shape = RoundedCornerShape(12.dp)
                     )
             ) {
@@ -81,7 +87,12 @@ fun ParallaxScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = if (isSystemInDarkTheme()) Color(0xFF1E2123) else Color(0xFFF5F5F5),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline,
                         shape = RoundedCornerShape(12.dp)
                     )
             ) {

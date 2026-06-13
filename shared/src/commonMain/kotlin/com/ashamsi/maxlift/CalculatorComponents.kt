@@ -78,7 +78,7 @@ fun WeightConverter(modifier: Modifier = Modifier) {
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             shape = RoundedCornerShape(4.dp)
         ) {
             Text("Reset", color = MaterialTheme.colorScheme.onSurface)
@@ -149,7 +149,7 @@ fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.onSurface, RoundedCornerShape(4.dp)),
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = reps.toString(), color = MaterialTheme.colorScheme.onSurface)
@@ -182,7 +182,7 @@ fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             shape = RoundedCornerShape(4.dp)
         ) {
             Text("Reset", color = MaterialTheme.colorScheme.onSurface)
@@ -207,7 +207,7 @@ fun CustomNumericInput(
         modifier = modifier
             .height(40.dp)
             .background(Color.Transparent)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
             .padding(horizontal = 8.dp),
         textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
@@ -233,7 +233,7 @@ fun CalculatorButton(
         onClick = onClick,
         modifier = modifier.height(48.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         shape = RoundedCornerShape(4.dp),
         contentPadding = PaddingValues(0.dp)
     ) {
