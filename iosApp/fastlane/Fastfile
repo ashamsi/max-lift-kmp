@@ -29,7 +29,8 @@ platform :ios do
         provisioningProfiles: {
           "com.arturshamsi.maxlift" => ENV["PROVISIONING_PROFILE_NAME"]
         }
-      }
+      },
+      xcargs: "PROVISIONING_PROFILE_SPECIFIER='#{ENV["PROVISIONING_PROFILE_NAME"]}'"
     )
 
     upload_to_testflight(
