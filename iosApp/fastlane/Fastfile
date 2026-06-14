@@ -14,6 +14,9 @@ platform :ios do
     # Build the KMP framework first
     sh("cd ../.. && ./gradlew :shared:assemble")
 
+    # Disable automatic signing for CI
+    disable_automatic_code_signing(path: "iosApp.xcodeproj")
+
     # Build and upload
     build_app(
       scheme: "iosApp",
@@ -21,7 +24,11 @@ platform :ios do
       include_bitcode: false,
       export_method: "app-store",
       clean: true,
-      xcargs: "ALLOW_PROVISIONING_DEVICE_REGISTRATION=NO CODE_SIGN_STYLE=Manual"
+      export_options: {
+        provisioningProfiles: {
+          "com.arturshamsi.maxlift" => ENV["PROVISIONING_PROFILE_NAME"]
+        }
+      }
     )
 
     upload_to_testflight(
