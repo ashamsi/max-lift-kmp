@@ -11,8 +11,9 @@ platform :ios do
       is_key_content_base64: true # We will provide the P8 file as a base64 string
     )
 
-    # Build the KMP framework first
-    sh("cd ../.. && ./gradlew :shared:assemble")
+    # Optimization: Only build the specific iOS framework needed for the App Store (Arm64 Release)
+    # This prevents building Android and Simulator binaries which saves ~15-20 minutes on CI.
+    sh("cd ../.. && ./gradlew :shared:linkReleaseFrameworkIosArm64")
 
     # Disable automatic signing for CI
     disable_automatic_code_signing(path: "iosApp.xcodeproj")
