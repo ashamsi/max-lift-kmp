@@ -88,13 +88,21 @@ fun WeightConverter(modifier: Modifier = Modifier) {
 
 @Composable
 fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
+    val storage = LocalSecureStorage.current
     var weightText by remember { mutableStateOf("") }
     var reps by remember { mutableStateOf(1) }
     var isLb by remember { mutableStateOf(true) }
+    
+    val selectedFormulasIds by storage.getStringFlow("selected_formulas").collectAsState(initial = FormulaType.Brzycki.id)
+    val selectedFormulas = remember(selectedFormulasIds) {
+        selectedFormulasIds?.split(",")?.mapNotNull { id ->
+            FormulaType.entries.find { it.id == id }
+        }?.ifEmpty { listOf(FormulaType.Brzycki) } ?: listOf(FormulaType.Brzycki)
+    }
 
-    val oneRM = remember(weightText, reps) {
+    val oneRM = remember(weightText, reps, selectedFormulas) {
         weightText.toDoubleOrNull()?.let { weight ->
-            Formulas.calculateOneRM(FormulaType.Brzycki, weight, reps)
+            Formulas.calculateMeanOneRM(selectedFormulas, weight, reps)
         } ?: 0.0
     }
 

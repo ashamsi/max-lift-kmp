@@ -63,6 +63,22 @@ object Formulas {
         return roundToTwoDecimals(result)
     }
 
+    fun calculateMeanOneRM(types: List<FormulaType>, weight: Double, reps: Int): Double {
+        if (types.isEmpty()) return 0.0
+        val sum = types.sumOf { type ->
+            when (type) {
+                FormulaType.Brzycki -> calculateBrzycki(weight, reps)
+                FormulaType.Epley -> calculateEpley(weight, reps)
+                FormulaType.Lander -> calculateLander(weight, reps)
+                FormulaType.Lombardi -> calculateLombardi(weight, reps)
+                FormulaType.Mayhew -> calculateMayhew(weight, reps)
+                FormulaType.OConner -> calculateOConner(weight, reps)
+                FormulaType.Wathan -> calculateWathan(weight, reps)
+            }
+        }
+        return roundToTwoDecimals(sum / types.size)
+    }
+
     fun roundToTwoDecimals(value: Double): Double {
         return (value * 100).roundToInt() / 100.0
     }

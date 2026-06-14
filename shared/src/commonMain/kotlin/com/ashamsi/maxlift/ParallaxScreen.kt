@@ -29,7 +29,10 @@ import maxlift.shared.generated.resources.header_light
 import maxlift.shared.generated.resources.header_dark
 
 @Composable
-fun ParallaxScreen() {
+fun ParallaxScreen(
+    onNavigateToFormulas: () -> Unit,
+    onNavigateToAbout: () -> Unit
+) {
     val scrollState = rememberScrollState()
     var showMenu by remember { mutableStateOf(false) }
 
@@ -132,7 +135,7 @@ fun ParallaxScreen() {
                     leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
                     onClick = {
                         showMenu = false
-                        // TODO: Navigate to Formulas
+                        onNavigateToFormulas()
                     }
                 )
                 DropdownMenuItem(
@@ -140,7 +143,7 @@ fun ParallaxScreen() {
                     leadingIcon = { Icon(Icons.Default.Build, contentDescription = null) },
                     onClick = {
                         showMenu = false
-                        // TODO: Navigate to About
+                        onNavigateToAbout()
                     }
                 )
             }
@@ -152,7 +155,7 @@ fun ParallaxScreen() {
 @Composable
 fun ParallaxScreenPreview() {
     MaterialTheme {
-        ParallaxScreen()
+        ParallaxScreen(onNavigateToFormulas = {}, onNavigateToAbout = {})
     }
 }
 
@@ -160,7 +163,7 @@ fun ParallaxScreenPreview() {
 @Composable
 fun ParallaxScreenSmallPreview() {
     MaterialTheme {
-        ParallaxScreen()
+        ParallaxScreen(onNavigateToFormulas = {}, onNavigateToAbout = {})
     }
 }
 
@@ -169,6 +172,6 @@ fun ParallaxScreenSmallPreview() {
 fun ParallaxScreenDarkPreview() {
     MaterialTheme(colorScheme = MaterialTheme.colorScheme.copy(surface = Color.Black)) {
         // Force dark theme if your App implementation doesn't automatically switch
-        ParallaxScreen()
+        ParallaxScreen(onNavigateToFormulas = {}, onNavigateToAbout = {})
     }
 }
