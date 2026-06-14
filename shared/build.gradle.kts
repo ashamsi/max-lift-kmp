@@ -37,6 +37,12 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            // Tink is strictly an Android-native crypto library
+            implementation(libs.google.tink)
+        }
+        iosMain.dependencies {
+            // KeychainSettings belongs strictly to the iOS implementation target
+            implementation(libs.multiplatform.settings.noarg)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -48,9 +54,20 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            // Core DataStore interfaces/flows are shared here
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.multiplatform.settings.coroutines)
+            implementation(libs.kotlinx.coroutines.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.core)
+                implementation(libs.robolectric)
+            }
         }
     }
 }
