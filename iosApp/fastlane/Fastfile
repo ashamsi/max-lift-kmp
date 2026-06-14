@@ -16,12 +16,12 @@ platform :ios do
     sh("cd ../.. && ./gradlew :shared:linkReleaseFrameworkIosArm64")
 
     # Disable automatic signing for CI
-    disable_automatic_code_signing(path: "iosApp.xcodeproj")
+    disable_automatic_code_signing(path: "../iosApp.xcodeproj")
 
     # Build and upload
     build_app(
       scheme: "iosApp",
-      project: "iosApp.xcodeproj",
+      project: "../iosApp.xcodeproj",
       include_bitcode: false,
       export_method: "app-store",
       clean: true,
