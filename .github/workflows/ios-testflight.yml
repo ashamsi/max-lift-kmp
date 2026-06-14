@@ -59,5 +59,8 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_P8_BASE64 }}
-        run: fastlane beta
+        run: |
+          # Confirm shared scheme exists
+          ls -R iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/
+          fastlane beta
         working-directory: iosApp

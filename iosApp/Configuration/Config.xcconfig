@@ -1,4 +1,5 @@
-TEAM_ID=
+// IMPORTANT: You MUST fill in your Apple Team ID here for TestFlight to work
+TEAM_ID=QX3X452TR7
 
 PRODUCT_NAME=Max Lift
 PRODUCT_BUNDLE_IDENTIFIER=com.arturshamsi.maxlift
