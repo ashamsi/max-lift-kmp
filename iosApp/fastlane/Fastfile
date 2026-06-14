@@ -17,7 +17,7 @@ platform :ios do
     # Build and upload
     build_app(
       scheme: "iosApp",
-      workspace: "iosApp.xcworkspace",
+      project: "iosApp.xcodeproj",
       include_bitcode: false,
       export_method: "app-store"
     )
