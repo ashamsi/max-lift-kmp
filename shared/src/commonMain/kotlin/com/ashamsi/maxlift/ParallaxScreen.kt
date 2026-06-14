@@ -9,9 +9,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +31,7 @@ import maxlift.shared.generated.resources.header_dark
 @Composable
 fun ParallaxScreen() {
     val scrollState = rememberScrollState()
+    var showMenu by remember { mutableStateOf(false) }
 
     // Determine the header image based on the system theme
     val headerImage = if (isSystemInDarkTheme()) {
@@ -105,18 +108,42 @@ fun ParallaxScreen() {
             }
         }
 
-        IconButton(
-            onClick = { /* TODO: Navigate to settings */ },
+        Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .statusBarsPadding()
                 .padding(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onSurface
-            )
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Formulas") },
+                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        // TODO: Navigate to Formulas
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("About") },
+                    leadingIcon = { Icon(Icons.Default.Build, contentDescription = null) },
+                    onClick = {
+                        showMenu = false
+                        // TODO: Navigate to About
+                    }
+                )
+            }
         }
     }
 }
