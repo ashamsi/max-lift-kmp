@@ -15,9 +15,15 @@ platform :ios do
     # This prevents building Android and Simulator binaries which saves ~15-20 minutes on CI.
     sh("cd ../.. && ./gradlew :shared:linkReleaseFrameworkIosArm64")
 
-    # Disable automatic signing for CI
-    # In some fastlane versions the project path is relative to the iosApp directory
-    disable_automatic_code_signing(path: "iosApp.xcodeproj")
+    # App Store archives require Apple Distribution + manual signing in CI
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "iosApp.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      code_sign_identity: "Apple Distribution",
+      profile_name: ENV["PROVISIONING_PROFILE_NAME"],
+      bundle_identifier: "com.arturshamsi.maxlift"
+    )
 
     # Build and upload
     build_app(
@@ -30,8 +36,7 @@ platform :ios do
         provisioningProfiles: {
           "com.arturshamsi.maxlift" => ENV["PROVISIONING_PROFILE_NAME"]
         }
-      },
-      xcargs: "PROVISIONING_PROFILE_SPECIFIER='#{ENV["PROVISIONING_PROFILE_NAME"]}'"
+      }
     )
 
     upload_to_testflight(
