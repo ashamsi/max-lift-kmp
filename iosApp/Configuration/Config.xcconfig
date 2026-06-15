@@ -6,3 +6,7 @@ PRODUCT_BUNDLE_IDENTIFIER=com.arturshamsi.maxlift
 
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0
+
+// KMP static framework (embedAndSignAppleFrameworkForXcode output)
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+OTHER_LDFLAGS = $(inherited) -framework Shared -framework UIUtilities

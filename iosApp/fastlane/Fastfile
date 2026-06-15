@@ -11,9 +11,8 @@ platform :ios do
       is_key_content_base64: true # We will provide the P8 file as a base64 string
     )
 
-    # Optimization: Only build the specific iOS framework needed for the App Store (Arm64 Release)
-    # This prevents building Android and Simulator binaries which saves ~15-20 minutes on CI.
-    sh("cd ../.. && ./gradlew :shared:linkReleaseFrameworkIosArm64")
+    # Kotlin framework is built by the Xcode "Compile Kotlin Framework" run script
+    # (embedAndSignAppleFrameworkForXcode), which outputs to the path in Config.xcconfig.
 
     # App Store archives require Apple Distribution + manual signing in CI
     update_code_signing_settings(
