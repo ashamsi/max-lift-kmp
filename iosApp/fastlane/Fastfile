@@ -1,14 +1,53 @@
 default_platform(:ios)
 
+def app_store_version(marketing_version)
+  parts = marketing_version.split(".")
+  case parts.length
+  when 1 then "#{parts[0]}.0.0"
+  when 2 then "#{parts[0]}.#{parts[1]}.0"
+  else marketing_version
+  end
+end
+
+def bump_build_number!(api_key:, app_identifier:, xcconfig_path:)
+  xcconfig = File.read(xcconfig_path)
+  marketing_version = xcconfig[/^MARKETING_VERSION=(.+)$/, 1]&.strip
+  UI.user_error!("MARKETING_VERSION not found in #{xcconfig_path}") unless marketing_version
+
+  latest_build = latest_testflight_build_number(
+    api_key: api_key,
+    app_identifier: app_identifier,
+    version: app_store_version(marketing_version)
+  )
+  next_build = latest_build + 1
+
+  File.write(
+    xcconfig_path,
+    xcconfig.sub(/^CURRENT_PROJECT_VERSION=\d+/, "CURRENT_PROJECT_VERSION=#{next_build}")
+  )
+
+  UI.success("Build number set to #{next_build} for version #{marketing_version}")
+  next_build
+end
+
 platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
+    app_identifier = "com.arturshamsi.maxlift"
+    xcconfig_path = File.expand_path("../Configuration/Config.xcconfig", __dir__)
+
     # Authenticate with App Store Connect using P8 Auth Key
     api_key = app_store_connect_api_key(
       key_id: ENV["ASC_KEY_ID"],
       issuer_id: ENV["ASC_ISSUER_ID"],
       key_content: ENV["ASC_KEY_CONTENT"],
       is_key_content_base64: true # We will provide the P8 file as a base64 string
+    )
+
+    bump_build_number!(
+      api_key: api_key,
+      app_identifier: app_identifier,
+      xcconfig_path: xcconfig_path
     )
 
     # Kotlin framework is built by the Xcode "Compile Kotlin Framework" run script
@@ -21,7 +60,7 @@ platform :ios do
       team_id: ENV["TEAM_ID"],
       code_sign_identity: "Apple Distribution",
       profile_name: ENV["PROVISIONING_PROFILE_NAME"],
-      bundle_identifier: "com.arturshamsi.maxlift"
+      bundle_identifier: app_identifier
     )
 
     # Build and upload
@@ -33,7 +72,7 @@ platform :ios do
       clean: true,
       export_options: {
         provisioningProfiles: {
-          "com.arturshamsi.maxlift" => ENV["PROVISIONING_PROFILE_NAME"]
+          app_identifier => ENV["PROVISIONING_PROFILE_NAME"]
         }
       }
     )
