@@ -5,7 +5,9 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/" # Adjust if your Gradle project is in a subdirectory (e.g., "/android")
     schedule:
-      interval: "daily"
+      interval: "cron"
+      cronjob: "0 9 1,15 * *"
+      timezone: "America/New_York"
     open-pull-requests-limit: 5
     # Optional: Group updates together to reduce PR noise
     groups:
@@ -20,12 +22,16 @@ updates:
   - package-ecosystem: "swift"
     directory: "/iosApp"
     schedule:
-      interval: "daily"
+      interval: "cron"
+      cronjob: "0 9 1,15 * *"
+      timezone: "America/New_York"
     open-pull-requests-limit: 3
 
   # 3. CI/CD Workflows (GitHub Actions)
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "cron"
+      cronjob: "0 9 1,15 * *"
+      timezone: "America/New_York"
     open-pull-requests-limit: 2
