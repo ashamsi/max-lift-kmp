@@ -1,0 +1,27 @@
+<svg width="1024" height="500" viewBox="0 0 1024 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1024" height="500" fill="#151718"/>
+
+  <!-- Decorative Primary Gradient Circle -->
+  <circle cx="900" cy="100" r="200" fill="#5383EC" fill-opacity="0.15"/>
+  <circle cx="100" cy="400" r="150" fill="#5383EC" fill-opacity="0.1"/>
+
+  <!-- Brand Text -->
+  <text x="512" y="240" font-family="Arial, sans-serif" font-weight="bold" font-size="84" fill="white" text-anchor="middle">Max Lift</text>
+
+  <!-- Description -->
+  <text x="512" y="300" font-family="Arial, sans-serif" font-size="32" fill="#5383EC" text-anchor="middle">1RM Calculator &amp; Weight Converter</text>
+
+  <!-- Slogan / Footer -->
+  <text x="512" y="450" font-family="Arial, sans-serif" font-size="18" fill="#3F4346" text-anchor="middle">STRENGTH TRAINING COMPANION</text>
+
+  <!-- Stylized Icon (Calculator symbol) -->
+  <rect x="477" y="80" width="70" height="90" rx="8" stroke="white" stroke-width="4" stroke-opacity="0.8"/>
+  <line x1="492" y1="110" x2="532" y2="110" stroke="white" stroke-width="4" stroke-opacity="0.8"/>
+  <circle cx="497" cy="140" r="4" fill="white" fill-opacity="0.8"/>
+  <circle cx="512" cy="140" r="4" fill="white" fill-opacity="0.8"/>
+  <circle cx="527" cy="140" r="4" fill="white" fill-opacity="0.8"/>
+  <circle cx="497" cy="155" r="4" fill="white" fill-opacity="0.8"/>
+  <circle cx="512" cy="155" r="4" fill="white" fill-opacity="0.8"/>
+  <circle cx="527" cy="155" r="4" fill="white" fill-opacity="0.8"/>
+</svg>
