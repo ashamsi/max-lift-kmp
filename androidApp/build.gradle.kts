@@ -28,8 +28,27 @@ android {
         applicationId = "com.arturshamsi.maxlift"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // Must increase for every Play upload (match or exceed any prior RN/KMP release).
+        versionCode = 5
+        versionName = "1.0.0"
+    }
+    signingConfigs {
+        create("release") {
+            // Release signing secrets are provided by GitHub Actions only
+            // (.github/workflows/android-play-internal.yml)
+            val envKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+                ?: error(
+                    "Release signing is not configured locally. " +
+                        "Upload builds via the Android Play Internal Upload workflow."
+                )
+            storeFile = file(envKeystorePath)
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                ?: error("Missing ANDROID_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                ?: error("Missing ANDROID_KEY_ALIAS")
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+                ?: error("Missing ANDROID_KEY_PASSWORD")
+        }
     }
     packaging {
         resources {
@@ -39,6 +58,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
