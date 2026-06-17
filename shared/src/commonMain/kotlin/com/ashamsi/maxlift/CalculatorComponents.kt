@@ -3,16 +3,23 @@ package com.ashamsi.maxlift
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,7 +31,18 @@ fun WeightConverter(modifier: Modifier = Modifier) {
     var lbText by remember { mutableStateOf("") }
     var kgText by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    Column(modifier = modifier
+        .padding(16.dp)
+        .clickable(
+            indication = null,
+            interactionSource = remember {MutableInteractionSource()}
+        ) {
+            focusManager.clearFocus()
+        }
+    ) {
         Text(
             text = "Converter:",
             style = MaterialTheme.typography.titleLarge,
@@ -49,7 +67,9 @@ fun WeightConverter(modifier: Modifier = Modifier) {
                     }
                 },
                 placeholder = "0",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                keyboardController = keyboardController,
+                focusManager = focusManager
             )
             Text(" lb", color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(horizontal = 4.dp))
             Text(" = ", color = MaterialTheme.colorScheme.onSurface)
@@ -66,7 +86,9 @@ fun WeightConverter(modifier: Modifier = Modifier) {
                     }
                 },
                 placeholder = "0",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                keyboardController = keyboardController,
+                focusManager = focusManager
             )
             Text(" kg", color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(horizontal = 4.dp))
         }
@@ -106,7 +128,18 @@ fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
         } ?: 0.0
     }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    Column(modifier = modifier
+        .padding(16.dp)
+        .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() }
+        ) {
+            focusManager.clearFocus()
+        }
+    ) {
         Text(
             text = "1RM calculator",
             style = MaterialTheme.typography.titleLarge,
@@ -119,7 +152,9 @@ fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
                 value = weightText,
                 onValueChange = { weightText = it },
                 placeholder = "Eqpt. weight, ${if (isLb) "lb" else "kg"}",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                keyboardController = keyboardController,
+                focusManager = focusManager
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text("lb", color = MaterialTheme.colorScheme.onSurface)
@@ -203,7 +238,9 @@ fun CustomNumericInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = ""
+    placeholder: String = "",
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager
 ) {
     BasicTextField(
         value = value,
@@ -227,7 +264,13 @@ fun CustomNumericInput(
                 }
                 innerTextField()
             }
-        }
+        },
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            }
+        )
     )
 }
 
