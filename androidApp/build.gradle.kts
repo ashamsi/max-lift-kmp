@@ -34,20 +34,17 @@ android {
     }
     signingConfigs {
         create("release") {
-            // Release signing secrets are provided by GitHub Actions only
-            // (.github/workflows/android-play-internal.yml)
             val envKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
-                ?: error(
-                    "Release signing is not configured locally. " +
-                        "Upload builds via the Android Play Internal Upload workflow."
-                )
-            storeFile = file(envKeystorePath)
-            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                ?: error("Missing ANDROID_KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("ANDROID_KEY_ALIAS")
-                ?: error("Missing ANDROID_KEY_ALIAS")
-            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
-                ?: error("Missing ANDROID_KEY_PASSWORD")
+            val envStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            val envKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+            val envKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+
+            if (envKeystorePath != null && envStorePassword != null && envKeyAlias != null && envKeyPassword != null) {
+                storeFile = file(envKeystorePath)
+                storePassword = envStorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
+            }
         }
     }
     packaging {
@@ -56,9 +53,15 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         getByName("release") {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+            val isSigningConfigured = System.getenv("ANDROID_KEYSTORE_PATH") != null
+            if (isSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
