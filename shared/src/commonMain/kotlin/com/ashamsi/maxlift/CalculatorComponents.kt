@@ -27,21 +27,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun WeightConverter(modifier: Modifier = Modifier) {
+fun WeightConverter(
+    modifier: Modifier = Modifier,
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager
+) {
     var lbText by remember { mutableStateOf("") }
     var kgText by remember { mutableStateOf("") }
 
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-
     Column(modifier = modifier
         .padding(16.dp)
-        .clickable(
-            indication = null,
-            interactionSource = remember {MutableInteractionSource()}
-        ) {
-            focusManager.clearFocus()
-        }
     ) {
         Text(
             text = "Converter:",
@@ -109,7 +104,11 @@ fun WeightConverter(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun OneRepMaxCalculator(modifier: Modifier = Modifier) {
+fun OneRepMaxCalculator(
+    modifier: Modifier = Modifier,
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager
+) {
     val storage = LocalSecureStorage.current
     var weightText by remember { mutableStateOf("") }
     var reps by remember { mutableStateOf(1) }

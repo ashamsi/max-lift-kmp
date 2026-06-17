@@ -3,6 +3,8 @@ package com.ashamsi.maxlift
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
@@ -43,13 +47,22 @@ fun ParallaxScreen(
         Res.drawable.header_light
     }
 
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember {MutableInteractionSource()}
+                ) {
+                    focusManager.clearFocus()
+                },
         ) {
             Box(
                 modifier = Modifier
@@ -91,7 +104,9 @@ fun ParallaxScreen(
                             shape = RoundedCornerShape(12.dp)
                         )
                 ) {
-                    WeightConverter()
+                    WeightConverter(
+                        keyboardController = keyboardController,
+                        focusManager = focusManager)
                 }
                 Box(
                     modifier = Modifier
@@ -106,7 +121,10 @@ fun ParallaxScreen(
                             shape = RoundedCornerShape(12.dp)
                         )
                 ) {
-                    OneRepMaxCalculator()
+                    OneRepMaxCalculator(
+                        keyboardController = keyboardController,
+                        focusManager = focusManager
+                    )
                 }
             }
         }
