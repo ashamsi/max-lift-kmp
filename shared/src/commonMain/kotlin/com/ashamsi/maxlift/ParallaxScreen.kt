@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.painterResource
 import maxlift.shared.generated.resources.Res
 import maxlift.shared.generated.resources.header_light
 import maxlift.shared.generated.resources.header_dark
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun ParallaxScreen(
@@ -103,14 +104,20 @@ fun ParallaxScreen(
         scrollGeneration++
     }
 
+//    LaunchedEffect(scrollGeneration, viewportHeight, imeBottom) {
+//        if (pendingScrollCard == null) return@LaunchedEffect
+//        delay(150)
+//        scrollState.animateScrollTo(cardScrollTarget(pendingScrollCard))
+//        if (imeBottom > 0) {
+//            delay(250)
+//            scrollState.animateScrollTo(cardScrollTarget(pendingScrollCard))
+//        }
+//    }
+
     LaunchedEffect(scrollGeneration, viewportHeight, imeBottom) {
         if (pendingScrollCard == null) return@LaunchedEffect
-        delay(150)
+        delay(100.milliseconds)
         scrollState.animateScrollTo(cardScrollTarget(pendingScrollCard))
-        if (imeBottom > 0) {
-            delay(250)
-            scrollState.animateScrollTo(cardScrollTarget(pendingScrollCard))
-        }
     }
 
     val scrollToConverter = { requestScrollToCard(converterCardCoords) }
