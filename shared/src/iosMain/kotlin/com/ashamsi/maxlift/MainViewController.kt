@@ -1,5 +1,12 @@
 package com.ashamsi.maxlift
 
+import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 
-fun MainViewController() = ComposeUIViewController { App(SecureStorageFactory()) }
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        onFocusBehavior = OnFocusBehavior.DoNothing
+    }
+) {
+    App(SecureStorageFactory())
+}

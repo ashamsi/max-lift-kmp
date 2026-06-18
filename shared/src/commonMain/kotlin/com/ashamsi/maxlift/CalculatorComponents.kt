@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -15,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
@@ -22,9 +25,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import kotlinx.coroutines.launch
 
 @Composable
 fun WeightConverter(
@@ -107,7 +113,7 @@ fun WeightConverter(
 fun OneRepMaxCalculator(
     modifier: Modifier = Modifier,
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager
+    focusManager: FocusManager,
 ) {
     val storage = LocalSecureStorage.current
     var weightText by remember { mutableStateOf("") }
@@ -126,9 +132,6 @@ fun OneRepMaxCalculator(
             Formulas.calculateMeanOneRM(selectedFormulas, weight, reps)
         } ?: 0.0
     }
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
 
     Column(modifier = modifier
         .padding(16.dp)
@@ -241,36 +244,70 @@ fun CustomNumericInput(
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager
 ) {
-    BasicTextField(
-        value = value,
-        onValueChange = { text ->
-            if (text.isEmpty() || text.toDoubleOrNull() != null) {
-                onValueChange(text)
-            }
-        },
-        modifier = modifier
-            .height(40.dp)
-            .background(Color.Transparent)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp),
-        textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-        decorationBox = { innerTextField ->
-            Box(contentAlignment = Alignment.CenterStart) {
-                if (value.isEmpty()) {
-                    Text(placeholder, color = Color.Gray, fontSize = 14.sp)
+    var isFocused by remember { mutableStateOf(false) }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+
+    Column(modifier) {
+        BasicTextField(
+            value = value,
+            onValueChange = { text ->
+                if (text.isEmpty() || text.toDoubleOrNull() != null) {
+                    onValueChange(text)
                 }
-                innerTextField()
-            }
-        },
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
-                focusManager.clearFocus()
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .background(Color.Transparent)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                .padding(horizontal = 8.dp)
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .onFocusChanged { focusState ->
+                    isFocused = focusState.isFocused
+                    if (focusState.isFocused) {
+                        scope.launch { bringIntoViewRequester.bringIntoView() }
+                    }
+                },
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Done
+            ),
+            decorationBox = { innerTextField ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (value.isEmpty()) {
+                        Text(placeholder, color = Color.Gray, fontSize = 14.sp)
+                    }
+                    innerTextField()
+                }
+            },
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }
+            )
         )
-    )
+
+        if (getPlatform().type == PlatformType.IOS && isFocused) {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .windowInsetsPadding(WindowInsets.ime) // Dynamically locks it right on top of iOS keyboard
+//                    .background(Color(0xFFF6F6F6)) // Matches iOS system keyboard gray
+//                    .padding(horizontal = 16.dp, vertical = 8.dp)
+//            ) {
+//                TextButton(
+//                    onClick = { focusManager.clearFocus() },
+//                    modifier = Modifier.align(Alignment.CenterEnd)
+//                ) {
+//                    Text("Done", style = MaterialTheme.typography.labelLarge)
+//                }
+//            }
+        }
+    }
 }
 
 @Composable
