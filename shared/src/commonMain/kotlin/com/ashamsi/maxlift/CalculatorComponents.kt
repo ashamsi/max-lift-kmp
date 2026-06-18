@@ -6,8 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -20,8 +18,6 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,21 +25,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import kotlinx.coroutines.launch
 
 @Composable
 fun WeightConverter(
     modifier: Modifier = Modifier,
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager
+    focusManager: FocusManager,
+    onInputFocused: () -> Unit = {}
 ) {
     var lbText by remember { mutableStateOf("") }
     var kgText by remember { mutableStateOf("") }
 
-    Column(modifier = modifier
-        .padding(16.dp)
-    ) {
+    Column(modifier = modifier.padding(16.dp)) {
         Text(
             text = "Converter:",
             style = MaterialTheme.typography.titleLarge,
@@ -70,7 +63,8 @@ fun WeightConverter(
                 placeholder = "0",
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
-                focusManager = focusManager
+                focusManager = focusManager,
+                onFocused = onInputFocused
             )
             Text(" lb", color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(horizontal = 4.dp))
             Text(" = ", color = MaterialTheme.colorScheme.onSurface)
@@ -89,7 +83,8 @@ fun WeightConverter(
                 placeholder = "0",
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
-                focusManager = focusManager
+                focusManager = focusManager,
+                onFocused = onInputFocused
             )
             Text(" kg", color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(horizontal = 4.dp))
         }
@@ -114,6 +109,7 @@ fun OneRepMaxCalculator(
     modifier: Modifier = Modifier,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
+    onInputFocused: () -> Unit = {}
 ) {
     val storage = LocalSecureStorage.current
     var weightText by remember { mutableStateOf("") }
@@ -133,14 +129,15 @@ fun OneRepMaxCalculator(
         } ?: 0.0
     }
 
-    Column(modifier = modifier
-        .padding(16.dp)
-        .clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() }
-        ) {
-            focusManager.clearFocus()
-        }
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                focusManager.clearFocus()
+            }
     ) {
         Text(
             text = "1RM calculator",
@@ -156,7 +153,8 @@ fun OneRepMaxCalculator(
                 placeholder = "Eqpt. weight, ${if (isLb) "lb" else "kg"}",
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
-                focusManager = focusManager
+                focusManager = focusManager,
+                onFocused = onInputFocused
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text("lb", color = MaterialTheme.colorScheme.onSurface)
@@ -242,12 +240,9 @@ fun CustomNumericInput(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager
+    focusManager: FocusManager,
+    onFocused: () -> Unit = {}
 ) {
-    var isFocused by remember { mutableStateOf(false) }
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
-    val scope = rememberCoroutineScope()
-
     Column(modifier) {
         BasicTextField(
             value = value,
@@ -262,11 +257,9 @@ fun CustomNumericInput(
                 .background(Color.Transparent)
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                 .padding(horizontal = 8.dp)
-                .bringIntoViewRequester(bringIntoViewRequester)
                 .onFocusChanged { focusState ->
-                    isFocused = focusState.isFocused
                     if (focusState.isFocused) {
-                        scope.launch { bringIntoViewRequester.bringIntoView() }
+                        onFocused()
                     }
                 },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 16.sp),
@@ -290,23 +283,6 @@ fun CustomNumericInput(
                 }
             )
         )
-
-        if (getPlatform().type == PlatformType.IOS && isFocused) {
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .windowInsetsPadding(WindowInsets.ime) // Dynamically locks it right on top of iOS keyboard
-//                    .background(Color(0xFFF6F6F6)) // Matches iOS system keyboard gray
-//                    .padding(horizontal = 16.dp, vertical = 8.dp)
-//            ) {
-//                TextButton(
-//                    onClick = { focusManager.clearFocus() },
-//                    modifier = Modifier.align(Alignment.CenterEnd)
-//                ) {
-//                    Text("Done", style = MaterialTheme.typography.labelLarge)
-//                }
-//            }
-        }
     }
 }
 
