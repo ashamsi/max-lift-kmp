@@ -26,6 +26,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private const val ONE_RM_MAX_LB = 1500.0
+private const val ONE_RM_MAX_KG = 999.0
+private const val CONVERTER_MAX_LB = 9999.0
+private const val CONVERTER_MAX_KG = 999.0
+
 @Composable
 fun WeightConverter(
     modifier: Modifier = Modifier,
@@ -61,6 +66,7 @@ fun WeightConverter(
                     }
                 },
                 placeholder = "0",
+                maxValue = CONVERTER_MAX_LB,
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
                 focusManager = focusManager,
@@ -81,6 +87,7 @@ fun WeightConverter(
                     }
                 },
                 placeholder = "0",
+                maxValue = CONVERTER_MAX_KG,
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
                 focusManager = focusManager,
@@ -151,6 +158,7 @@ fun OneRepMaxCalculator(
                 value = weightText,
                 onValueChange = { weightText = it },
                 placeholder = "Eqpt. weight, ${if (isLb) "lb" else "kg"}",
+                maxValue = if (isLb) ONE_RM_MAX_LB else ONE_RM_MAX_KG,
                 modifier = Modifier.weight(1f),
                 keyboardController = keyboardController,
                 focusManager = focusManager,
@@ -164,9 +172,13 @@ fun OneRepMaxCalculator(
                     val nextIsLb = !checked
                     weightText.toDoubleOrNull()?.let { currentWeight ->
                         weightText = if (nextIsLb) {
-                            Formulas.convertKgToLb(currentWeight).toString()
+                            Formulas.convertKgToLb(currentWeight)
+                                .coerceAtMost(ONE_RM_MAX_LB)
+                                .toString()
                         } else {
-                            Formulas.convertLbToKg(currentWeight).toString()
+                            Formulas.convertLbToKg(currentWeight)
+                                .coerceAtMost(ONE_RM_MAX_KG)
+                                .toString()
                         }
                     }
                     isLb = nextIsLb
@@ -239,6 +251,7 @@ fun CustomNumericInput(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "",
+    maxValue: Double? = null,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
     onFocused: () -> Unit = {}
@@ -247,7 +260,12 @@ fun CustomNumericInput(
         BasicTextField(
             value = value,
             onValueChange = { text ->
-                if (text.isEmpty() || text.toDoubleOrNull() != null) {
+                if (text.isEmpty()) {
+                    onValueChange(text)
+                    return@BasicTextField
+                }
+                val numericValue = text.toDoubleOrNull() ?: return@BasicTextField
+                if (maxValue == null || numericValue <= maxValue) {
                     onValueChange(text)
                 }
             },
