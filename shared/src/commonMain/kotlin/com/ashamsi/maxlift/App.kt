@@ -55,7 +55,9 @@ fun App(factory: SecureStorageFactory? = null) {
                     Screen.Formulas -> FormulaSelectionScreen(
                         onBack = { currentScreen = Screen.Main }
                     )
-                    Screen.About -> { /* TODO */ }
+                    Screen.About -> AboutScreen(
+                        onBack = { currentScreen = Screen.Main }
+                    )
                 }
             }
         } else {
@@ -66,7 +68,9 @@ fun App(factory: SecureStorageFactory? = null) {
                     onNavigateToAbout = { currentScreen = Screen.About }
                 )
                 Screen.Formulas -> { /* Empty for preview */ }
-                Screen.About -> { /* TODO */ }
+                Screen.About -> AboutScreen(
+                    onBack = { currentScreen = Screen.Main }
+                )
             }
         }
     }
