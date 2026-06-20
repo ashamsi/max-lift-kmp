@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -40,6 +46,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             // Tink is strictly an Android-native crypto library
             implementation(libs.google.tink)
+            implementation(libs.koin.android)
         }
         iosMain.dependencies {
             // KeychainSettings belongs strictly to the iOS implementation target
@@ -59,6 +66,20 @@ kotlin {
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.multiplatform.settings.coroutines)
             implementation(libs.kotlinx.coroutines.core)
+
+            // Room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+
+            // Koin
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+
+            // Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -75,4 +96,7 @@ kotlin {
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 }

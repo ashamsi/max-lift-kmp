@@ -6,7 +6,8 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import com.ashamsi.maxlift.di.appModule
+import org.koin.compose.KoinApplication
 
 val LocalSecureStorage = staticCompositionLocalOf<SecureStorage> {
     error("No SecureStorage provided")
@@ -18,8 +19,14 @@ enum class Screen {
     About
 }
 
+/**
+ * Root Composable for the application.
+ *
+ * @param factory Factory to create the secure storage instance.
+ * @param context Platform-specific context (e.g., Android Context).
+ */
 @Composable
-fun App(factory: SecureStorageFactory? = null) {
+fun App(factory: SecureStorageFactory? = null, context: Any? = null) {
     val darkTheme = isSystemInDarkTheme()
     val colorScheme = if (darkTheme) {
         darkColorScheme(
@@ -44,33 +51,37 @@ fun App(factory: SecureStorageFactory? = null) {
     var currentScreen by remember { mutableStateOf(Screen.Main) }
     val storage = remember { factory?.createStorage() }
 
-    MaterialTheme(colorScheme = colorScheme) {
-        if (storage != null) {
-            CompositionLocalProvider(LocalSecureStorage provides storage) {
+    KoinApplication(application = {
+        modules(appModule(context))
+    }) {
+        MaterialTheme(colorScheme = colorScheme) {
+            if (storage != null) {
+                CompositionLocalProvider(LocalSecureStorage provides storage) {
+                    when (currentScreen) {
+                        Screen.Main -> ParallaxScreen(
+                            onNavigateToFormulas = { currentScreen = Screen.Formulas },
+                            onNavigateToAbout = { currentScreen = Screen.About }
+                        )
+                        Screen.Formulas -> FormulaSelectionScreen(
+                            onBack = { currentScreen = Screen.Main }
+                        )
+                        Screen.About -> AboutScreen(
+                            onBack = { currentScreen = Screen.Main }
+                        )
+                    }
+                }
+            } else {
+                // Fallback for previews
                 when (currentScreen) {
                     Screen.Main -> ParallaxScreen(
                         onNavigateToFormulas = { currentScreen = Screen.Formulas },
                         onNavigateToAbout = { currentScreen = Screen.About }
                     )
-                    Screen.Formulas -> FormulaSelectionScreen(
-                        onBack = { currentScreen = Screen.Main }
-                    )
+                    Screen.Formulas -> { /* Empty for preview */ }
                     Screen.About -> AboutScreen(
                         onBack = { currentScreen = Screen.Main }
                     )
                 }
-            }
-        } else {
-            // Fallback for previews
-            when (currentScreen) {
-                Screen.Main -> ParallaxScreen(
-                    onNavigateToFormulas = { currentScreen = Screen.Formulas },
-                    onNavigateToAbout = { currentScreen = Screen.About }
-                )
-                Screen.Formulas -> { /* Empty for preview */ }
-                Screen.About -> AboutScreen(
-                    onBack = { currentScreen = Screen.Main }
-                )
             }
         }
     }

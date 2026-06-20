@@ -11,28 +11,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ashamsi.maxlift.presentation.formula.FormulaSelectionEvent
+import com.ashamsi.maxlift.presentation.formula.FormulaSelectionViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+/**
+ * Screen for selecting which 1RM formulas to use for calculations.
+ *
+ * @param onBack Callback when the user clicks the back button.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormulaSelectionScreen(onBack: () -> Unit) {
-    val storage = LocalSecureStorage.current
-    var selectedFormulas by remember { mutableStateOf(setOf(FormulaType.Brzycki)) }
-
-    LaunchedEffect(Unit) {
-        val saved = storage.getString("selected_formulas")
-        if (saved != null) {
-            val loaded = saved.split(",").mapNotNull { id ->
-                FormulaType.entries.find { it.id == id }
-            }.toSet()
-            if (loaded.isNotEmpty()) {
-                selectedFormulas = loaded
-            }
-        }
-    }
-
-    LaunchedEffect(selectedFormulas) {
-        storage.putString("selected_formulas", selectedFormulas.joinToString(",") { it.id })
-    }
+    val viewModel = koinViewModel<FormulaSelectionViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -53,41 +46,41 @@ fun FormulaSelectionScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            items(FormulaType.entries) { formula ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = selectedFormulas.contains(formula),
-                        onCheckedChange = { checked ->
-                            val newSet = if (checked) {
-                                selectedFormulas + formula
-                            } else {
-                                // Keep at least one selected
-                                if (selectedFormulas.size > 1) selectedFormulas - formula else selectedFormulas
-                            }
-                            selectedFormulas = newSet
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.outline
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                items(state.formulas) { selection ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selection.isSelected,
+                            onCheckedChange = { _ ->
+                                viewModel.onEvent(FormulaSelectionEvent.ToggleFormula(selection))
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary,
+                                uncheckedColor = MaterialTheme.colorScheme.outline
+                            )
                         )
-                    )
-                    Text(
-                        text = formula.name,
-                        modifier = Modifier.padding(start = 8.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                        Text(
+                            text = selection.type.name,
+                            modifier = Modifier.padding(start = 8.dp),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
