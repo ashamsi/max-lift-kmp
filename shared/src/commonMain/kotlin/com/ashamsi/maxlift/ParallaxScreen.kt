@@ -29,9 +29,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ashamsi.maxlift.presentation.calculator.CalculatorViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.viewmodel.koinViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 // Use your generated Res object for multiplatform images
 import maxlift.shared.generated.resources.Res
@@ -39,13 +42,22 @@ import maxlift.shared.generated.resources.header_light
 import maxlift.shared.generated.resources.header_dark
 import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Main screen of the application with a parallax header effect.
+ *
+ * @param onNavigateToFormulas Callback to navigate to the formula selection screen.
+ * @param onNavigateToAbout Callback to navigate to the about screen.
+ * @param viewModel ViewModel for calculator state management.
+ */
 @Composable
 fun ParallaxScreen(
     onNavigateToFormulas: () -> Unit,
-    onNavigateToAbout: () -> Unit
+    onNavigateToAbout: () -> Unit,
+    viewModel: CalculatorViewModel = koinViewModel()
 ) {
     val scrollState = rememberScrollState()
     var showMenu by remember { mutableStateOf(false) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     // Determine the header image based on the system theme
     val headerImage = if (isSystemInDarkTheme()) {
@@ -186,6 +198,8 @@ fun ParallaxScreen(
                         )
                 ) {
                     WeightConverter(
+                        state = state,
+                        onEvent = viewModel::onEvent,
                         keyboardController = keyboardController,
                         focusManager = focusManager,
                         onInputFocused = scrollToConverter
@@ -206,6 +220,8 @@ fun ParallaxScreen(
                         )
                 ) {
                     OneRepMaxCalculator(
+                        state = state,
+                        onEvent = viewModel::onEvent,
                         keyboardController = keyboardController,
                         focusManager = focusManager,
                         onInputFocused = scrollToCalculator

@@ -1,5 +1,6 @@
 package com.ashamsi.maxlift
 
+import com.ashamsi.maxlift.domain.model.FormulaType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

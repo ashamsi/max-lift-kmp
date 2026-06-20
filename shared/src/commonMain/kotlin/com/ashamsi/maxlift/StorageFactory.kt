@@ -2,6 +2,9 @@ package com.ashamsi.maxlift
 
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Interface for key-value storage.
+ */
 interface SecureStorage {
     suspend fun putString(key: String, value: String)
     suspend fun getString(key: String): String?
@@ -27,6 +30,12 @@ interface SecureStorage {
     suspend fun clear()
 }
 
+/**
+ * Platform-specific factory for creating [SecureStorage] instances.
+ */
 expect class SecureStorageFactory(context: Any? = null) {
+    /**
+     * Creates and returns a [SecureStorage] instance.
+     */
     fun createStorage(): SecureStorage
 }

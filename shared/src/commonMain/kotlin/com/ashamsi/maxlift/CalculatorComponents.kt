@@ -25,21 +25,29 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ashamsi.maxlift.domain.model.FormulaType
+import com.ashamsi.maxlift.presentation.calculator.CalculatorEvent
+import com.ashamsi.maxlift.presentation.calculator.CalculatorUiState
 
 private const val ONE_RM_MAX_LB = 1500.0
 private const val ONE_RM_MAX_KG = 999.0
 private const val CONVERTER_MAX_LB = 9999.0
 private const val CONVERTER_MAX_KG = 999.0
 
+/**
+ * Composable component for weight conversion between pounds and kilograms.
+ */
 @Composable
 fun WeightConverter(
     modifier: Modifier = Modifier,
+    state: CalculatorUiState,
+    onEvent: (CalculatorEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
     onInputFocused: () -> Unit = {}
 ) {
-    var lbText by remember { mutableStateOf("") }
-    var kgText by remember { mutableStateOf("") }
+    val lbText = state.calculatorState.converterLbText
+    val kgText = state.calculatorState.converterKgText
 
     Column(modifier = modifier.padding(16.dp)) {
         Text(
@@ -55,16 +63,7 @@ fun WeightConverter(
         ) {
             CustomNumericInput(
                 value = lbText,
-                onValueChange = {
-                    lbText = it
-                    if (it.isEmpty()) {
-                        kgText = ""
-                    } else {
-                        it.toDoubleOrNull()?.let { lb ->
-                            kgText = Formulas.convertLbToKg(lb).toString()
-                        }
-                    }
-                },
+                onValueChange = { onEvent(CalculatorEvent.UpdateConverterLb(it)) },
                 placeholder = "0",
                 maxValue = CONVERTER_MAX_LB,
                 modifier = Modifier.weight(1f),
@@ -76,16 +75,7 @@ fun WeightConverter(
             Text(" = ", color = MaterialTheme.colorScheme.onSurface)
             CustomNumericInput(
                 value = kgText,
-                onValueChange = {
-                    kgText = it
-                    if (it.isEmpty()) {
-                        lbText = ""
-                    } else {
-                        it.toDoubleOrNull()?.let { kg ->
-                            lbText = Formulas.convertKgToLb(kg).toString()
-                        }
-                    }
-                },
+                onValueChange = { onEvent(CalculatorEvent.UpdateConverterKg(it)) },
                 placeholder = "0",
                 maxValue = CONVERTER_MAX_KG,
                 modifier = Modifier.weight(1f),
@@ -97,10 +87,7 @@ fun WeightConverter(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = {
-                lbText = ""
-                kgText = ""
-            },
+            onClick = { onEvent(CalculatorEvent.ResetConverter) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -111,30 +98,22 @@ fun WeightConverter(
     }
 }
 
+/**
+ * Composable component for calculating 1RM based on weight and reps.
+ */
 @Composable
 fun OneRepMaxCalculator(
     modifier: Modifier = Modifier,
+    state: CalculatorUiState,
+    onEvent: (CalculatorEvent) -> Unit,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
     onInputFocused: () -> Unit = {}
 ) {
-    val storage = LocalSecureStorage.current
-    var weightText by remember { mutableStateOf("") }
-    var reps by remember { mutableStateOf(1) }
-    var isLb by remember { mutableStateOf(true) }
-    
-    val selectedFormulasIds by storage.getStringFlow("selected_formulas").collectAsState(initial = FormulaType.Brzycki.id)
-    val selectedFormulas = remember(selectedFormulasIds) {
-        selectedFormulasIds?.split(",")?.mapNotNull { id ->
-            FormulaType.entries.find { it.id == id }
-        }?.ifEmpty { listOf(FormulaType.Brzycki) } ?: listOf(FormulaType.Brzycki)
-    }
-
-    val oneRM = remember(weightText, reps, selectedFormulas) {
-        weightText.toDoubleOrNull()?.let { weight ->
-            Formulas.calculateMeanOneRM(selectedFormulas, weight, reps)
-        } ?: 0.0
-    }
+    val weightText = state.calculatorState.oneRmWeightText
+    val reps = state.calculatorState.oneRmReps
+    val isLb = state.calculatorState.oneRmIsLb
+    val oneRM = state.oneRmResult
 
     Column(
         modifier = modifier
@@ -156,7 +135,7 @@ fun OneRepMaxCalculator(
         Row(verticalAlignment = Alignment.CenterVertically) {
             CustomNumericInput(
                 value = weightText,
-                onValueChange = { weightText = it },
+                onValueChange = { onEvent(CalculatorEvent.UpdateOneRmWeight(it)) },
                 placeholder = "Eqpt. weight, ${if (isLb) "lb" else "kg"}",
                 maxValue = if (isLb) ONE_RM_MAX_LB else ONE_RM_MAX_KG,
                 modifier = Modifier.weight(1f),
@@ -169,19 +148,7 @@ fun OneRepMaxCalculator(
             Switch(
                 checked = !isLb,
                 onCheckedChange = { checked ->
-                    val nextIsLb = !checked
-                    weightText.toDoubleOrNull()?.let { currentWeight ->
-                        weightText = if (nextIsLb) {
-                            Formulas.convertKgToLb(currentWeight)
-                                .coerceAtMost(ONE_RM_MAX_LB)
-                                .toString()
-                        } else {
-                            Formulas.convertLbToKg(currentWeight)
-                                .coerceAtMost(ONE_RM_MAX_KG)
-                                .toString()
-                        }
-                    }
-                    isLb = nextIsLb
+                    onEvent(CalculatorEvent.ToggleOneRmUnit(!checked))
                 },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.onSurface,
@@ -198,7 +165,7 @@ fun OneRepMaxCalculator(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CalculatorButton("-", modifier = Modifier.weight(1f)) {
-                if (reps > 1) reps--
+                if (reps > 1) onEvent(CalculatorEvent.UpdateOneRmReps(reps - 1))
             }
             Box(
                 modifier = Modifier
@@ -210,7 +177,7 @@ fun OneRepMaxCalculator(
                 Text(text = reps.toString(), color = MaterialTheme.colorScheme.onSurface)
             }
             CalculatorButton("+", modifier = Modifier.weight(1f)) {
-                if (reps < 10) reps++
+                if (reps < 10) onEvent(CalculatorEvent.UpdateOneRmReps(reps + 1))
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -223,7 +190,7 @@ fun OneRepMaxCalculator(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = if (oneRM > 0) "$oneRM ${if (isLb) "lb" else "kg"}" else "0",
+                text = if (oneRM > 0) "${Formulas.roundToTwoDecimals(oneRM)} ${if (isLb) "lb" else "kg"}" else "0",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
@@ -231,10 +198,7 @@ fun OneRepMaxCalculator(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = {
-                weightText = ""
-                reps = 1
-            },
+            onClick = { onEvent(CalculatorEvent.ResetOneRm) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
@@ -245,6 +209,10 @@ fun OneRepMaxCalculator(
     }
 }
 
+
+/**
+ * Custom numeric input field with a maximum value constraint.
+ */
 @Composable
 fun CustomNumericInput(
     value: String,
@@ -304,6 +272,9 @@ fun CustomNumericInput(
     }
 }
 
+/**
+ * Standardized button for calculator actions.
+ */
 @Composable
 fun CalculatorButton(
     text: String,
