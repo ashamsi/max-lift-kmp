@@ -1,32 +1,22 @@
 default_platform(:ios)
 
-def app_store_version(marketing_version)
-  parts = marketing_version.split(".")
-  case parts.length
-  when 1 then "#{parts[0]}.0.0"
-  when 2 then "#{parts[0]}.#{parts[1]}.0"
-  else marketing_version
-  end
-end
-
-def bump_build_number!(api_key:, app_identifier:, xcconfig_path:)
+def bump_build_number!(xcconfig_path:)
   xcconfig = File.read(xcconfig_path)
-  marketing_version = xcconfig[/^MARKETING_VERSION=(.+)$/, 1]&.strip
-  UI.user_error!("MARKETING_VERSION not found in #{xcconfig_path}") unless marketing_version
+  current_build = xcconfig[/^CURRENT_PROJECT_VERSION=(\d+)/, 1]&.to_i
+  UI.user_error!("CURRENT_PROJECT_VERSION not found in #{xcconfig_path}") unless current_build
 
-  latest_build = latest_testflight_build_number(
-    api_key: api_key,
-    app_identifier: app_identifier,
-    version: app_store_version(marketing_version)
-  )
-  next_build = latest_build + 1
+  # Simple monotonic increment. The bumped value is committed back to git (see
+  # the lane) so it persists across CI runs; without that, every run would read
+  # the same committed number and re-upload it, causing "Redundant Binary
+  # Upload" errors.
+  next_build = current_build + 1
 
   File.write(
     xcconfig_path,
     xcconfig.sub(/^CURRENT_PROJECT_VERSION=\d+/, "CURRENT_PROJECT_VERSION=#{next_build}")
   )
 
-  UI.success("Build number set to #{next_build} for version #{marketing_version}")
+  UI.success("Build number set to #{next_build}")
   next_build
 end
 
@@ -44,11 +34,16 @@ platform :ios do
       is_key_content_base64: true # We will provide the P8 file as a base64 string
     )
 
-    bump_build_number!(
-      api_key: api_key,
-      app_identifier: app_identifier,
-      xcconfig_path: xcconfig_path
+    next_build = bump_build_number!(xcconfig_path: xcconfig_path)
+
+    # Persist the bumped build number back to the repo *before* building/uploading.
+    # Committing first guarantees a number is never reused even if a later step
+    # fails (gaps in build numbers are harmless to TestFlight; collisions are not).
+    git_commit(
+      path: xcconfig_path,
+      message: "ci: bump iOS build number to #{next_build} [skip ci]"
     )
+    push_to_git_remote
 
     # Kotlin framework is built by the Xcode "Compile Kotlin Framework" run script
     # (embedAndSignAppleFrameworkForXcode), which outputs to the path in Config.xcconfig.

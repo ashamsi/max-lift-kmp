@@ -8,12 +8,20 @@ jobs:
     # Compose Multiplatform 1.11+ uses iOS 26 APIs (UIViewLayoutRegion / UIUtilities).
     # macos-latest still ships Xcode 16.x; macos-26 provides Xcode 26.x + iOS 26 SDK.
     runs-on: macos-26
+    permissions:
+      # Allow fastlane to commit & push the bumped build number back to the repo.
+      contents: write
     env:
       JAVA_TOOL_OPTIONS: "-Xmx4g" # Increase memory for Kotlin/Native compiler
       GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=4"
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
+
+      - name: Configure git identity for build-number bump commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Select Xcode 26
         run: |
