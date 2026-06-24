@@ -6,7 +6,7 @@ updates:
     directory: "/" # Adjust if your Gradle project is in a subdirectory (e.g., "/android")
     schedule:
       interval: "cron"
-      cronjob: "0 9 1,15 * *"
+      cronjob: "0 9 1 * *"
       timezone: "America/New_York"
     open-pull-requests-limit: 5
     # Optional: Group updates together to reduce PR noise
@@ -23,7 +23,7 @@ updates:
     directory: "/iosApp"
     schedule:
       interval: "cron"
-      cronjob: "0 9 1,15 * *"
+      cronjob: "0 9 1 * *"
       timezone: "America/New_York"
     open-pull-requests-limit: 3
 
@@ -32,6 +32,6 @@ updates:
     directory: "/"
     schedule:
       interval: "cron"
-      cronjob: "0 9 1,15 * *"
+      cronjob: "0 9 1 * *"
       timezone: "America/New_York"
     open-pull-requests-limit: 2
