@@ -227,9 +227,18 @@ fun ParallaxScreen(
                         onInputFocused = scrollToCalculator
                     )
                 }
+                
+                // Add spacer to ensure content isn't covered by the bottom ad banner
+                Spacer(modifier = Modifier.height(50.dp))
             }
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
+
+        AdBanner(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+        )
 
         Box(
             modifier = Modifier

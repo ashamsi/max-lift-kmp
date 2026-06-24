@@ -44,6 +44,9 @@ fun FormulaSelectionScreen(onBack: () -> Unit) {
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
+        },
+        bottomBar = {
+            AdBanner(modifier = Modifier.navigationBarsPadding())
         }
     ) { padding ->
         if (state.isLoading) {

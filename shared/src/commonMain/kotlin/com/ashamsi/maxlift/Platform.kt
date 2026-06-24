@@ -13,6 +13,8 @@ interface Platform {
     val name: String
     /** Type of the platform. */
     val type: PlatformType
+    /** Whether the app is running in a debug/development environment. */
+    val isDebug: Boolean
 }
 
 /**

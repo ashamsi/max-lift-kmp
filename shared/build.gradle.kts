@@ -47,6 +47,7 @@ kotlin {
             // Tink is strictly an Android-native crypto library
             implementation(libs.google.tink)
             implementation(libs.koin.android)
+            implementation(libs.play.services.ads)
         }
         iosMain.dependencies {
             // KeychainSettings belongs strictly to the iOS implementation target
