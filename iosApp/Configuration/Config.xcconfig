@@ -4,6 +4,10 @@ TEAM_ID=QX3X452TR7
 PRODUCT_NAME=Max Lift
 PRODUCT_BUNDLE_IDENTIFIER=com.arturshamsi.maxlift
 
+// Minimum supported iOS version. Floors: Compose Multiplatform 1.11 (iOS 14),
+// Google Mobile Ads 13.x (iOS 13). 16.0 sits safely above both.
+IPHONEOS_DEPLOYMENT_TARGET = 16.0
+
 // Build number is auto-bumped by fastlane beta from the latest TestFlight build.
 CURRENT_PROJECT_VERSION=5
 MARKETING_VERSION=1.0
