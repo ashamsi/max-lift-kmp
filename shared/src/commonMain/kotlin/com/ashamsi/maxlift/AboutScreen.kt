@@ -37,6 +37,9 @@ fun AboutScreen(onBack: () -> Unit) {
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
+        },
+        bottomBar = {
+            AdBanner(modifier = Modifier.navigationBarsPadding())
         }
     ) { padding ->
         Column(
