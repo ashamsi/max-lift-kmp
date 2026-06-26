@@ -8,3 +8,4 @@
 
 ## Checklist
 - [ ] My code compiles and runs on both platforms
+- [ ] I ran all tests locally for both platforms
