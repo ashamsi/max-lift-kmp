@@ -78,41 +78,42 @@ class CalculatorViewModel(
     }
 
     fun onEvent(event: CalculatorEvent) {
-        viewModelScope.launch {
-            val currentState = _state.value.calculatorState
-            val newState = when (event) {
-                is CalculatorEvent.UpdateConverterLb -> {
-                    val kg = if (event.text.isEmpty()) "" else {
-                        event.text.toDoubleOrNull()?.let { Formulas.convertLbToKg(it).toString() } ?: ""
-                    }
-                    currentState.copy(converterLbText = event.text, converterKgText = kg)
+        val currentState = _state.value.calculatorState
+        val newCalculatorState = when (event) {
+            is CalculatorEvent.UpdateConverterLb -> {
+                val kg = if (event.text.isEmpty()) "" else {
+                    event.text.toDoubleOrNull()?.let { Formulas.convertLbToKg(it).toString() } ?: ""
                 }
-                is CalculatorEvent.UpdateConverterKg -> {
-                    val lb = if (event.text.isEmpty()) "" else {
-                        event.text.toDoubleOrNull()?.let { Formulas.convertKgToLb(it).toString() } ?: ""
-                    }
-                    currentState.copy(converterKgText = event.text, converterLbText = lb)
-                }
-                is CalculatorEvent.UpdateOneRmWeight -> currentState.copy(oneRmWeightText = event.text)
-                is CalculatorEvent.UpdateOneRmReps -> currentState.copy(oneRmReps = event.reps)
-                is CalculatorEvent.ToggleOneRmUnit -> {
-                    val nextIsLb = event.isLb
-                    val currentWeight = currentState.oneRmWeightText.toDoubleOrNull()
-                    val nextWeight = if (currentWeight != null) {
-                        if (nextIsLb) {
-                            Formulas.convertKgToLb(currentWeight).toString()
-                        } else {
-                            Formulas.convertLbToKg(currentWeight).toString()
-                        }
-                    } else {
-                        ""
-                    }
-                    currentState.copy(oneRmIsLb = nextIsLb, oneRmWeightText = nextWeight)
-                }
-                CalculatorEvent.ResetConverter -> currentState.copy(converterLbText = "", converterKgText = "")
-                CalculatorEvent.ResetOneRm -> currentState.copy(oneRmWeightText = "", oneRmReps = 1)
+                currentState.copy(converterLbText = event.text, converterKgText = kg)
             }
-            saveCalculatorStateUseCase(newState)
+            is CalculatorEvent.UpdateConverterKg -> {
+                val lb = if (event.text.isEmpty()) "" else {
+                    event.text.toDoubleOrNull()?.let { Formulas.convertKgToLb(it).toString() } ?: ""
+                }
+                currentState.copy(converterKgText = event.text, converterLbText = lb)
+            }
+            is CalculatorEvent.UpdateOneRmWeight -> currentState.copy(oneRmWeightText = event.text)
+            is CalculatorEvent.UpdateOneRmReps -> currentState.copy(oneRmReps = event.reps)
+            is CalculatorEvent.ToggleOneRmUnit -> {
+                val nextIsLb = event.isLb
+                val currentWeight = currentState.oneRmWeightText.toDoubleOrNull()
+                val nextWeight = if (currentWeight != null) {
+                    if (nextIsLb) {
+                        Formulas.convertKgToLb(currentWeight).toString()
+                    } else {
+                        Formulas.convertLbToKg(currentWeight).toString()
+                    }
+                } else {
+                    ""
+                }
+                currentState.copy(oneRmIsLb = nextIsLb, oneRmWeightText = nextWeight)
+            }
+            CalculatorEvent.ResetConverter -> currentState.copy(converterLbText = "", converterKgText = "")
+            CalculatorEvent.ResetOneRm -> currentState.copy(oneRmWeightText = "", oneRmReps = 1)
+        }
+        _state.update { it.copy(calculatorState = newCalculatorState) }
+        viewModelScope.launch {
+            saveCalculatorStateUseCase(newCalculatorState)
         }
     }
 }
