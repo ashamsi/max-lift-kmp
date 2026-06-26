@@ -13,7 +13,7 @@ composeMultiplatform = "1.11.1"
 junit = "4.13.2"
 kotlin = "2.4.0"
 material3 = "1.11.0-alpha07"
-robolectric = "4.14.1"
+robolectric = "4.16.1"
 androidxTestCore = "1.6.1"
 
 datastore = "1.2.1"
