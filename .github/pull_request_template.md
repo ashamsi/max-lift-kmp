@@ -7,5 +7,6 @@
 - [ ] Breaking change (fix or feature causing existing functionality to break)
 
 ## Checklist
+- [ ] PR description provided
 - [ ] My code compiles and runs on both platforms
 - [ ] I ran all tests locally for both platforms
