@@ -29,7 +29,9 @@ android {
         applicationId = "com.arturshamsi.maxlift"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        // Must increase for every Play upload (match or exceed any prior RN/KMP release).
+        // Auto-incremented by the Play Internal CI workflow, which commits the bumped
+        // value back to this file so it persists across runs (mirrors the iOS build
+        // number). Must match or exceed any prior RN/KMP release.
         versionCode = 5
         versionName = "1.0.0"
     }
