@@ -19,10 +19,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ashamsi.maxlift.domain.model.FormulaType
@@ -224,16 +226,30 @@ fun CustomNumericInput(
     focusManager: FocusManager,
     onFocused: () -> Unit = {}
 ) {
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(value)) }
+
+    LaunchedEffect(value) {
+        if (value != textFieldValue.text) {
+            textFieldValue = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            )
+        }
+    }
+
     Column(modifier) {
         BasicTextField(
-            value = value,
-            onValueChange = { text ->
+            value = textFieldValue,
+            onValueChange = { updated ->
+                val text = updated.text
                 if (text.isEmpty()) {
+                    textFieldValue = updated
                     onValueChange(text)
                     return@BasicTextField
                 }
                 val numericValue = text.toDoubleOrNull() ?: return@BasicTextField
                 if (maxValue == null || numericValue <= maxValue) {
+                    textFieldValue = updated
                     onValueChange(text)
                 }
             },
@@ -256,7 +272,7 @@ fun CustomNumericInput(
             ),
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterStart) {
-                    if (value.isEmpty()) {
+                    if (textFieldValue.text.isEmpty()) {
                         Text(placeholder, color = Color.Gray, fontSize = 14.sp)
                     }
                     innerTextField()

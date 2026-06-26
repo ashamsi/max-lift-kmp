@@ -57,11 +57,26 @@ class CalculatorViewModelTest {
     @Test
     fun testUpdateOneRmWeight() = runTest {
         viewModel.onEvent(CalculatorEvent.UpdateOneRmWeight("100"))
-        testDispatcher.scheduler.advanceUntilIdle()
-        
+
         val state = viewModel.state.value
         assertEquals("100", state.calculatorState.oneRmWeightText)
         assertEquals(100.0, state.oneRmResult) // Brzycki: 100 * (36/(37-1)) = 100
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals("100", mockCalculatorRepository.savedState.value.oneRmWeightText)
+    }
+
+    @Test
+    fun testRapidSequentialWeightUpdates() = runTest {
+        viewModel.onEvent(CalculatorEvent.UpdateOneRmWeight("1"))
+        viewModel.onEvent(CalculatorEvent.UpdateOneRmWeight("12"))
+        viewModel.onEvent(CalculatorEvent.UpdateOneRmWeight("123"))
+        viewModel.onEvent(CalculatorEvent.UpdateOneRmWeight("1234"))
+
+        assertEquals("1234", viewModel.state.value.calculatorState.oneRmWeightText)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals("1234", mockCalculatorRepository.savedState.value.oneRmWeightText)
     }
 
     @Test
@@ -89,10 +104,10 @@ class CalculatorViewModelTest {
 }
 
 class MockCalculatorRepository : CalculatorRepository {
-    private val stateFlow = MutableStateFlow(CalculatorState())
-    override fun getCalculatorState(): Flow<CalculatorState> = stateFlow
+    val savedState = MutableStateFlow(CalculatorState())
+    override fun getCalculatorState(): Flow<CalculatorState> = savedState
     override suspend fun saveCalculatorState(state: CalculatorState) {
-        stateFlow.value = state
+        savedState.value = state
     }
 }
 
