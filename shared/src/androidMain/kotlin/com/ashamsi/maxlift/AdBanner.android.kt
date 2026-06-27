@@ -1,5 +1,6 @@
 package com.ashamsi.maxlift
 
+import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -12,14 +13,16 @@ import com.google.android.gms.ads.AdView
 
 @Composable
 actual fun AdBanner(modifier: Modifier) {
-    val platform = getPlatform()
-    val adUnitId = AdConfig.getBannerAdUnitId(platform.type, platform.isDebug)
-
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
             .height(50.dp),
         factory = { context ->
+            // Only debug builds are flagged debuggable; release AABs (including the
+            // Play Internal track) are not, so they correctly resolve to production ads.
+            val isDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            val adUnitId = AdConfig.getBannerAdUnitId(PlatformType.Android, isDebug)
+
             AdView(context).apply {
                 this.adUnitId = adUnitId
                 setAdSize(AdSize.FULL_BANNER)

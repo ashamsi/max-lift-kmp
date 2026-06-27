@@ -8,3 +8,6 @@
 #   http://developer.android.com/guide/developing/tools-adk/proguard.html
 
 # Add any KMP specific rules here if needed.
+
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
