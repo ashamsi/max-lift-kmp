@@ -17,9 +17,13 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-9953397470667764~3798097599" />
 
+        <!-- ROTATION DOOR: locked to portrait for now. Remove android:screenOrientation
+             (or set to "fullSensor"/"unspecified") to enable rotation; the adaptive banner
+             already recomputes its size on configuration changes. -->
         <activity
             android:exported="true"
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
