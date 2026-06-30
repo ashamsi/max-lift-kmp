@@ -5,26 +5,38 @@ import os.log
 
 private let adLog = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.arturshamsi.maxlift", category: "MaxLiftAds")
 
-/// Retained for the lifetime of the app so BannerViewDelegate callbacks stay valid.
+/// Bridges AdMob `BannerViewDelegate` callbacks to the shared Compose layer so it can
+/// react to load/failure events (e.g. collapse the banner when an ad fails).
+///
+/// A delegate instance is created per banner and retained via an associated object on the
+/// banner itself (see `AdBannerLoader`), so its callbacks stay valid for the banner's life.
 private final class AdBannerDelegate: NSObject, BannerViewDelegate {
+    private let listener: AdBannerListener
+
+    init(listener: AdBannerListener) {
+        self.listener = listener
+    }
+
     func bannerViewDidReceiveAd(_ bannerView: BannerView) {
         adLog.info("Banner loaded. unit=\(bannerView.adUnitID ?? "nil", privacy: .public)")
+        listener.onAdLoaded()
     }
 
     func bannerView(_ bannerView: BannerView, didFailToReceiveAdWithError error: Error) {
         adLog.error(
             "Banner failed. unit=\(bannerView.adUnitID ?? "nil", privacy: .public), error=\(error.localizedDescription, privacy: .public)"
         )
+        listener.onAdFailedToLoad()
     }
 }
 
 private enum AdBannerLoader {
-    private static let delegate = AdBannerDelegate()
     private static var isSdkStarted = false
     private static var pendingLoad: (() -> Void)?
+    private static var delegateKey: UInt8 = 0
 
     static func configureFactory() {
-        AdViewFactory().createAdView = {
+        AdViewFactory().createAdView = { listener in
             let banner = BannerView(adSize: AdSizeBanner)
 
             #if DEBUG
@@ -35,7 +47,11 @@ private enum AdBannerLoader {
 
             let adUnitId = AdConfig.shared.getBannerAdUnitId(platformType: .ios, isDebug: isDebug)
             banner.adUnitID = adUnitId
+
+            let delegate = AdBannerDelegate(listener: listener)
             banner.delegate = delegate
+            // Keep the delegate alive for as long as the banner exists.
+            objc_setAssociatedObject(banner, &delegateKey, delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
             adLog.info("Requesting banner. isDebug=\(isDebug, privacy: .public), adUnitId=\(adUnitId, privacy: .public)")
 
