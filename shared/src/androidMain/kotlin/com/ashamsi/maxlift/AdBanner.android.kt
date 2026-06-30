@@ -37,7 +37,7 @@ actual fun AdBanner(modifier: Modifier) {
 
             AdView(context).apply {
                 this.adUnitId = adUnitId
-                setAdSize(AdSize.FULL_BANNER)
+                setAdSize(AdSize.BANNER)
                 // Mirrors the iOS BannerViewDelegate: log the outcome and update state so
                 // the banner collapses on failure.
                 adListener = object : AdListener() {
