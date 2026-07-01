@@ -37,7 +37,10 @@ private enum AdBannerLoader {
 
     static func configureFactory() {
         AdViewFactory().createAdView = { listener in
-            let banner = BannerView(adSize: AdSizeBanner)
+            // Large anchored adaptive banner: full-width, taller format optimized for video.
+            // https://developers.google.com/admob/ios/banner
+            let adSize = largeAnchoredAdaptiveBanner(width: currentAdWidth())
+            let banner = BannerView(adSize: adSize)
 
             #if DEBUG
             let isDebug = true
@@ -53,11 +56,30 @@ private enum AdBannerLoader {
             // Keep the delegate alive for as long as the banner exists.
             objc_setAssociatedObject(banner, &delegateKey, delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
-            adLog.info("Requesting banner. isDebug=\(isDebug, privacy: .public), adUnitId=\(adUnitId, privacy: .public)")
+            // Report the resolved adaptive height so the Compose container sizes to match.
+            listener.onAdSizeResolved(heightDp: Int32(adSize.size.height.rounded()))
+
+            adLog.info("Requesting adaptive banner. isDebug=\(isDebug, privacy: .public), adUnitId=\(adUnitId, privacy: .public), height=\(adSize.size.height, privacy: .public)")
 
             scheduleLoad(for: banner)
             return banner
+            // ROTATION DOOR: the app is currently locked to portrait, so width/height are
+            // computed once here. To support rotation later, observe
+            // `UIDevice.orientationDidChangeNotification` and re-run this sizing block
+            // (recompute `currentAdWidth()`, set `banner.adSize`, report the new height via
+            // `listener.onAdSizeResolved`, and reload), or rebuild the banner.
         }
+    }
+
+    /// Width available for the banner, derived from the key window's safe area.
+    /// Centralised so the ROTATION DOOR only has to recompute this on orientation change.
+    private static func currentAdWidth() -> CGFloat {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let window = scenes.flatMap(\.windows).first(where: \.isKeyWindow)
+            ?? scenes.flatMap(\.windows).first
+        let bounds = window?.bounds ?? UIScreen.main.bounds
+        let insets = window?.safeAreaInsets ?? .zero
+        return bounds.width - insets.left - insets.right
     }
 
     static func startSdk() {

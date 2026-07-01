@@ -26,6 +26,9 @@ import platform.CoreGraphics.CGRectMake
 interface AdBannerListener {
     fun onAdLoaded()
     fun onAdFailedToLoad()
+
+    /** Reports the resolved (adaptive) banner height in points/dp so Compose can size to match. */
+    fun onAdSizeResolved(heightDp: Int)
 }
 
 /**
@@ -42,24 +45,25 @@ object AdViewFactory {
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun AdBanner(modifier: Modifier) {
-    val controller = remember { AdBannerController() }
-    val listener = remember {
+actual fun AdBanner(modifier: Modifier, controller: AdBannerController?) {
+    val resolvedController = controller ?: remember { AdBannerController() }
+    val listener = remember(resolvedController) {
         object : AdBannerListener {
-            override fun onAdLoaded() = controller.onAdLoaded()
-            override fun onAdFailedToLoad() = controller.onAdFailedToLoad()
+            override fun onAdLoaded() = resolvedController.onAdLoaded()
+            override fun onAdFailedToLoad() = resolvedController.onAdFailedToLoad()
+            override fun onAdSizeResolved(heightDp: Int) = resolvedController.onAdSizeResolved(heightDp)
         }
     }
     val factory = AdViewFactory.createAdView
     if (factory != null) {
         // Collapse to zero space once the ad fails so we never show an empty banner slot.
-        if (!controller.shouldReserveSpace) return
+        if (!resolvedController.shouldReserveSpace) return
 
         UIKitView(
             factory = {
                 factory(listener)
             },
-            modifier = modifier.fillMaxWidth().height(controller.heightDp.dp)
+            modifier = modifier.fillMaxWidth().height(resolvedController.heightDp.dp)
         )
     } else {
         // Placeholder for development if factory is not set
