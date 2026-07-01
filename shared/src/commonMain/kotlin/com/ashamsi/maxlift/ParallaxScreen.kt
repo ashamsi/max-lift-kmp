@@ -59,6 +59,10 @@ fun ParallaxScreen(
     var showMenu by remember { mutableStateOf(false) }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // Hoisted so the bottom content spacer reserves exactly the banner's (adaptive) height
+    // and collapses with it when an ad fails to load (Option A).
+    val adBannerController = remember { AdBannerController() }
+
     // Determine the header image based on the system theme
     val headerImage = if (isSystemInDarkTheme()) {
         Res.drawable.header_dark
@@ -228,8 +232,9 @@ fun ParallaxScreen(
                     )
                 }
                 
-                // Add spacer to ensure content isn't covered by the bottom ad banner
-                Spacer(modifier = Modifier.height(50.dp))
+                // Reserve exactly the banner's current height so content isn't covered;
+                // collapses to 0 when the ad fails (see adBannerController).
+                Spacer(modifier = Modifier.height(adBannerController.heightDp.dp))
             }
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
@@ -237,7 +242,8 @@ fun ParallaxScreen(
         AdBanner(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
+                .navigationBarsPadding(),
+            controller = adBannerController
         )
 
         Box(

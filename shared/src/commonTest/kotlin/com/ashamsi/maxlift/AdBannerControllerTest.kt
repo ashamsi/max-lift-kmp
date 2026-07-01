@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class AdBannerControllerTest {
 
     @Test
-    fun initialStatusIsLoadingAndReservesSpace() {
+    fun initialStatusIsLoadingAndReservesDefaultHeight() {
         val controller = AdBannerController()
 
         assertEquals(AdBannerStatus.Loading, controller.status)
@@ -48,6 +48,41 @@ class AdBannerControllerTest {
         assertEquals(AdBannerStatus.Failed, controller.status)
         assertFalse(controller.shouldReserveSpace)
         assertEquals(0, controller.heightDp)
+    }
+
+    @Test
+    fun resolvedAdaptiveHeightIsReservedWhileVisible() {
+        val controller = AdBannerController()
+
+        controller.onAdSizeResolved(62)
+
+        assertEquals(62, controller.reservedHeightDp)
+        assertEquals(62, controller.heightDp)
+
+        controller.onAdLoaded()
+        assertEquals(62, controller.heightDp)
+    }
+
+    @Test
+    fun resolvedHeightStillCollapsesOnFailure() {
+        val controller = AdBannerController()
+
+        controller.onAdSizeResolved(90)
+        controller.onAdFailedToLoad()
+
+        assertEquals(90, controller.reservedHeightDp)
+        assertEquals(0, controller.heightDp, "Collapsed banner has no height regardless of resolved size")
+    }
+
+    @Test
+    fun nonPositiveResolvedHeightIsIgnored() {
+        val controller = AdBannerController()
+
+        controller.onAdSizeResolved(0)
+        controller.onAdSizeResolved(-10)
+
+        assertEquals(AdBannerPolicy.BANNER_HEIGHT_DP, controller.reservedHeightDp)
+        assertEquals(AdBannerPolicy.BANNER_HEIGHT_DP, controller.heightDp)
     }
 }
 
